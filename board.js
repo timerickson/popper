@@ -13,7 +13,7 @@ var Board = function (game) {
         var r, c, p, s;
         for (c = 0; c < 10; c++) {
             for (r = 0; r < 11; r++) {
-                s = new Slot(groups, c, r);
+                s = new Slot(groups, this, c, r);
                 this.columns[c][r] = s;
             }
         }
@@ -26,6 +26,24 @@ var Board = function (game) {
             }
         }
     };
+
+    var indicated = [];
+
+    this.indicate = function (c, r) {
+        indicated.push(this.columns[2][5]);
+        indicated.push(this.columns[3][6]);
+        for (var i = 0; i < indicated.length; i++) {
+            indicated[i].showDot(true);
+        }
+    };
+
+    this.clearIndication = function () {
+        for (var i = (indicated.length - 1); i >= 0; i--) {
+            indicated[i].showDot(false);
+            indicated.splice(i, 1);
+        }
+    };
+
     this.update = function () {
         //TODO
     };
