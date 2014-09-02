@@ -1,0 +1,6 @@
+{
+    "decsription": "Popper game",
+    "dependencies" : {
+        "browserify": ""
+    }
+}
