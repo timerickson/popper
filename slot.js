@@ -21,7 +21,10 @@ var Slot = function (groups, board, c, r) {
         _board.indicate(c, r);
     }, this);
     this.sprite.events.onInputOut.add(function () {
-        _board.clearIndicator();
+        _board.clearIndication();
+    }, this);
+    this.sprite.events.onInputUp.add(function () {
+        _board.poke(c, r);
     }, this);
 
     var pos = util.getPosition(r, c);
@@ -30,6 +33,14 @@ var Slot = function (groups, board, c, r) {
 
     this.showDot = function (show) {
         this.dot.visible(show);
+    };
+
+    this.pop = function () {
+        if (this.popper !== null) {
+            this.popper.pop();
+            this.popper = null;
+        }
+        this.showDot(false);
     };
 };
 Slot.load = function (game) {

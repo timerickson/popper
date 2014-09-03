@@ -19,6 +19,9 @@ var Popper = function (game, groups, c, r) {
 
     this.pos = addPos(game);
     this.pos({ row: r, col: c});
+    this.pop = function () {
+        groups.poppers.remove(this.sprite);
+    };
 };
 Popper.load = function (game) {
     game.load.spritesheet('poppers', 'poppers.png', config.PopperFrameWidth, config.PopperFrameHeight);

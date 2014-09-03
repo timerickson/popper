@@ -4,6 +4,7 @@ var Slot = require('./slot');
 var Board = function (game) {
     var _columns = [[], [], [], [], [], [], [], [], [], []];
     var _poppers = [];
+    var self = this;
     this.init = function () {
         var groups = {
             slots: game.add.group(),
@@ -30,9 +31,9 @@ var Board = function (game) {
     this.dropPoppers = function (isLevelStart) {
         var r, rAbove, maxRow, c, column;
         maxRow = isLevelStart ? 19 : 9;
-        for (r = 0; r <= maxRow; r++) {
-            for (c = 0; c < 10; c++) {
-                column = _columns[c];
+        for (c = 0; c < 10; c++) {
+            column = _columns[c];
+            for (r = 0; r <= maxRow; r++) {
                 if (column[r].popper !== null) {
                     continue;
                 }
@@ -50,11 +51,11 @@ var Board = function (game) {
 
     var _indicated = [];
 
-    this.collectGroup = function (col, row) {
+    var _collectGroup = function (col, row) {
         var r = row,
             c = col,
             checkSlot = _columns[c][r],
-            color = checkSlot.popper.color,
+            color,
             group = [],
             contains = function (arr, item) {
                 var i;
@@ -65,15 +66,19 @@ var Board = function (game) {
                 }
                 return false;
             };
-        function collect(slot) {
+        if (checkSlot.popper === null) {
+            return [];
+        }
+        color = checkSlot.popper.color;
+        var collect = function (slot) {
             if (slot.popper != null
                 && !contains(group, slot)
                 && slot.popper.color === color) {
                 group.push(slot);
                 checkAdjacent(slot);
             }
-        }
-        function checkAdjacent(slot) {
+        };
+        var checkAdjacent = function (slot) {
             var r = slot.row,
                 c = slot.col;
             if (r < 9) {
@@ -91,23 +96,47 @@ var Board = function (game) {
             if (c > 0) {
                 collect(_columns[c - 1][r]);
             }
-        }
+        };
         collect(_columns[c][r]);
         return group;
     };
 
+    var _pop = function () {
+        var i;
+        if (_indicated.length < 2) {
+            return;
+        }
+        for (i in _indicated) {
+            _indicated[i].pop();
+        }
+        self.dropPoppers(false);
+    };
+
     this.indicate = function (c, r) {
-        _indicated = this.collectGroup(c, r);
+        _indicated = _collectGroup(c, r);
         for (var i = 0; i < _indicated.length; i++) {
             _indicated[i].showDot(true);
         }
     };
 
-    this.clearIndicator = function () {
-        for (var i = (_indicated.length - 1); i >= 0; i--) {
-            _indicated[i].showDot(false);
-            _indicated.splice(i, 1);
+    this.clearIndication = function () {
+        for (var c = 0; c < 10; c++) {
+            for (var r = 0; r < 10; r++) {
+                _columns[c][r].showDot(false);
+            }
         }
+        _indicated = [];
+    };
+
+    this.poke = function (c, r) {
+        if (_indicated.length === 0) {
+            this.indicate(c, r);
+        }
+        if (_indicated.length < 2) {
+            return;
+        }
+        _pop();
+        this.clearIndication();
     };
 
     this.update = function () {
