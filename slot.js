@@ -2,7 +2,12 @@ var Dot = require('./dot');
 var util = require('./util');
 
 var Slot = function (groups, board, c, r) {
-    this.board = board;
+    var _board = board;
+
+    this.row = r;
+    this.col = c;
+
+    this.popper = null;
 
     this.sprite = groups.slots.create(0, 0, 'square');
     this.sprite.inputEnabled = true;
@@ -10,16 +15,14 @@ var Slot = function (groups, board, c, r) {
     this.sprite.scale.x = 0.5;
     this.sprite.scale.y = 0.5;
 
-    if (r < 10) {
-        this.dot = new Dot(groups, c, r);
-        this.dot.sprite.bringToTop();
-        this.sprite.events.onInputOver.add(function () {
-            this.board.indicate(c, r);
-        }, this);
-        this.sprite.events.onInputOut.add(function () {
-            this.board.clearIndication();
-        }, this);
-    }
+    this.dot = new Dot(groups, c, r);
+    this.dot.sprite.bringToTop();
+    this.sprite.events.onInputOver.add(function () {
+        _board.indicate(c, r);
+    }, this);
+    this.sprite.events.onInputOut.add(function () {
+        _board.clearIndicator();
+    }, this);
 
     var pos = util.getPosition(r, c);
     this.sprite.x = pos.x;

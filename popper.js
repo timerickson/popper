@@ -3,7 +3,7 @@ var addPos = require('./addPos');
 var util = require('./util');
 
 var Popper = function (game, groups, c, r) {
-    this.color = 0;
+    this.color = util.getRandomColor();
 
     if (c === undefined) {
         c = 0;
@@ -12,7 +12,7 @@ var Popper = function (game, groups, c, r) {
         r = 10;
     }
 
-    this.sprite = groups.poppers.create(0, 0, 'poppers', util.getRandomColor());
+    this.sprite = groups.poppers.create(0, 0, 'poppers', this.color);
     this.sprite.anchor.setTo(-0.15, -0.15);
     this.sprite.scale.x = 0.4;
     this.sprite.scale.y = 0.4;
