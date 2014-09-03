@@ -101,6 +101,44 @@ var Board = function (game) {
         return group;
     };
 
+    var _slidePoppers = function () {
+        var c, colToRight, r;
+        var isColBlank = function (colNum) {
+            var r,
+                isBlank = true;
+            for (r = 0; r < 10 && isBlank; r++) {
+                if (_columns[colNum][r].popper !== null) {
+                    isBlank = false;
+                }
+            }
+            return isBlank;
+        };
+        var slideLeft = function (colNum, toColNum) {
+            var r, colFrom;
+            for (r = 0; r < 10; r++) {
+                colFrom = _columns[colNum];
+                if (colFrom[r].popper === null) {
+                    break;
+                }
+                colFrom[r].popper.pos({col: toColNum, animate: true});
+                _columns[toColNum][r].popper = colFrom[r].popper;
+                colFrom[r].popper = null;
+            }
+        };
+        for (c = 0; c < 10; c++) {
+            if (!isColBlank(c)) {
+                continue;
+            }
+            for (colToRight = c + 1; colToRight < 10; colToRight++) {
+                if (isColBlank(colToRight, c)) {
+                    continue;
+                }
+                slideLeft(colToRight, c);
+                c++;
+            }
+        }
+    };
+
     var _pop = function () {
         var i;
         if (_indicated.length < 2) {
@@ -110,6 +148,7 @@ var Board = function (game) {
             _indicated[i].pop();
         }
         self.dropPoppers(false);
+        _slidePoppers();
     };
 
     this.indicate = function (c, r) {
