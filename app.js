@@ -20,7 +20,7 @@ var create = function () {
 };
 
 var update = function () {
-//    board.update();
+    board.update();
 };
 
 game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preLoad, create: create, update: update });

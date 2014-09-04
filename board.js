@@ -1,3 +1,4 @@
+var config = require('./config');
 var Popper = require('./popper');
 var Slot = require('./slot');
 
@@ -5,8 +6,25 @@ var Board = function (game) {
     var _columns = [[], [], [], [], [], [], [], [], [], []];
     var _poppers = [];
     var self = this;
+
+    this.level = 1;
+    this.target = 1000;
+    this.score = 0;
+    this.coins = 100;
+    this.bombPrice = 5;
+
+    this.levelText = null;
+    this.targetText = null;
+    this.scoreText = null;
+    this.coinsText = null;
+
+    var _score = function () {
+
+    };
+
     this.init = function () {
         var groups = {
+            texts: game.add.group(),
             slots: game.add.group(),
             poppers: game.add.group(),
             dots: game.add.group()
@@ -23,9 +41,13 @@ var Board = function (game) {
                 p = new Popper(game, groups, c, r + 10);
                 _poppers.push(p);
                 _columns[c][r + 10].popper = p;
-                p.pos({row: r + 10, col: c, animate: true});
+                p.pos({row: r + 10, col: c, animate: true, duration: config.AnimationTimeMs});
             }
         }
+        this.targetText = game.add.text(10, 10, '', {fill: 'white'}, groups.texts);
+        this.scoreText = game.add.text(250, 10, '', {fill: 'white'}, groups.texts);
+        this.levelText = game.add.text(10, 500, '', {fill: 'white'}, groups.texts);
+        this.coinsText = game.add.text(250, 500, '', {fill: 'white'}, groups.texts);
     };
 
     this.dropPoppers = function (isLevelStart) {
@@ -39,7 +61,7 @@ var Board = function (game) {
                 }
                 for (rAbove = r + 1; rAbove <= maxRow; rAbove++) {
                     if (column[rAbove].popper != null) {
-                        column[rAbove].popper.pos({row: r, animate: true});
+                        column[rAbove].popper.pos({row: r, animate: true, duration: config.AnimationTimeMs});
                         column[r].popper = column[rAbove].popper;
                         column[rAbove].popper = null;
                         break;
@@ -120,7 +142,7 @@ var Board = function (game) {
                 if (colFrom[r].popper === null) {
                     break;
                 }
-                colFrom[r].popper.pos({col: toColNum, animate: true});
+                colFrom[r].popper.pos({col: toColNum, animate: true, duration: config.AnimationTimeMs});
                 _columns[toColNum][r].popper = colFrom[r].popper;
                 colFrom[r].popper = null;
             }
@@ -147,6 +169,10 @@ var Board = function (game) {
         for (i in _indicated) {
             _indicated[i].pop();
         }
+        var score = config.Scores[_indicated.length];
+        self.score += score[0];
+        self.coins += score[1];
+        console.log('score', score[0]);
         self.dropPoppers(false);
         _slidePoppers();
     };
@@ -174,12 +200,16 @@ var Board = function (game) {
         if (_indicated.length < 2) {
             return;
         }
+        _score();
         _pop();
         this.clearIndication();
     };
 
     this.update = function () {
-        //TODO
+        this.levelText.text = 'Level: ' + this.level;
+        this.targetText.text = 'Target: ' + this.target;
+        this.scoreText.text = 'Score: ' + this.score;
+        this.coinsText.text = 'Coins: ' + this.coins;
     };
 };
 

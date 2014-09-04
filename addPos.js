@@ -3,6 +3,10 @@ var util = require('./util');
 module.exports = function addPos (game) {
     var _pos = { row: 0, col: 0 };
     return function (newPos) {
+        var duration = 1000;
+        if (newPos.duration !== undefined) {
+            duration = newPos.duration;
+        }
         if (newPos === undefined) {
             return _pos;
         }
@@ -17,7 +21,7 @@ module.exports = function addPos (game) {
             if (newPos.animate) {
                 this.animating = true;
                 game.add.tween(this.sprite)
-                    .to({x: p.x}, 1000, Phaser.Easing.Exponential.InOut, true)
+                    .to({x: p.x}, duration, Phaser.Easing.Exponential.InOut, true)
                     .onComplete.add(function () {
                         this.animating = false;
                     }, this);
@@ -29,7 +33,7 @@ module.exports = function addPos (game) {
             if (newPos.animate) {
                 this.animating = true;
                 game.add.tween(this.sprite)
-                    .to({y: p.y}, 1000, Phaser.Easing.Exponential.InOut, true)
+                    .to({y: p.y}, duration, Phaser.Easing.Exponential.InOut, true)
                     .onComplete.add(function () {
                         this.animating = false;
                     }, this);
