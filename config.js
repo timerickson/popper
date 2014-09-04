@@ -32,6 +32,12 @@ var config = {
         [2880,100,'omg'],
         [3380,100,'omg'],
         [4805,100,'omg']
+    ],
+    DefaultTargetIncrement: 1000,
+    Targets: [
+        1000,
+        2500,
+        3000
     ]
 };
 

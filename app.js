@@ -16,7 +16,7 @@ var preLoad = function () {
 var create = function () {
     game.physics.startSystem(Phaser.Physics.ARCADE);
     board.init();
-    board.dropPoppers(true);
+    board.startNextLevel();
 };
 
 var update = function () {
