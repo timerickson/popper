@@ -10,8 +10,9 @@ var Board = function (game) {
     this.level = 0;
     this.target = 0;
     this.score = 0;
-    this.coins = 100;
+    this.coins = 200;
     this.bombPrice = 5;
+    this.undoPrice = 10;
 
     this.levelText = null;
     this.targetText = null;
@@ -20,6 +21,9 @@ var Board = function (game) {
 
     var _score = function (group) {
         var groupSize = group.length;
+        if (groupSize > (config.Scores.length - 1)) {
+            groupSize = config.Scores.length - 1;
+        }
         var score = config.Scores[groupSize];
         self.score += score[0];
         self.coins += score[1];
@@ -46,9 +50,16 @@ var Board = function (game) {
         this.scoreText = game.add.text(250, 10, '', {fill: 'white'}, _spriteGroups.texts);
         this.levelText = game.add.text(10, 500, '', {fill: 'white'}, _spriteGroups.texts);
         this.coinsText = game.add.text(250, 500, '', {fill: 'white'}, _spriteGroups.texts);
+
+        for (c = 0; c < 10; c++) {
+            for (r = 0; r < 20; r++) {
+                s = new Slot(_spriteGroups, self, c, r);
+                _columns[c][r] = s;
+            }
+        }
     };
 
-    this.startNextLevel = function () {
+    this.startNextLevel = function (data) {
         if (this.score < this.target) {
             alert('Game Over!');
             return;
@@ -62,25 +73,57 @@ var Board = function (game) {
         } else {
             this.target += config.DefaultTargetIncrement;
         }
-        this.fillPoppers();
+        this.clearPoppers();
+        this.fillPoppers(data);
         this.dropPoppers(true);
         _collectGroups();
     };
 
-    this.fillPoppers = function () {
-        for (c = 0; c < 10; c++) {
-            for (r = 0; r < 20; r++) {
-                s = new Slot(_spriteGroups, this, c, r);
-                _columns[c][r] = s;
-            }
-        }
+    this.clearPoppers = function () {
+        var r, c, slot;
         for (c = 0; c < 10; c++) {
             for (r = 0; r < 10; r++) {
-                p = new Popper(game, _spriteGroups, c, r + 10);
+                slot = _columns[c][r];
+                if (slot.popper === null) {
+                    continue;
+                }
+                slot.pop();
+            }
+        }
+    }
+
+    this.fillPoppers = function (data) {
+        var c, r, p, color;
+        for (c = 0; c < 10; c++) {
+            for (r = 0; r < 10; r++) {
+                if (data !== undefined) {
+                    color = data[c][r];
+                }
+                p = new Popper(game, _spriteGroups, c, r + 10, color);
                 _poppers.push(p);
                 _columns[c][r + 10].popper = p;
                 p.pos({row: r + 10, col: c, animate: true, duration: config.AnimationTimeMs});
             }
+        }
+        if (data === undefined) {
+            var str = '';
+            for (c = 0; c < 10; c++) {
+                if (c > 0) {
+                    str += '\r\n';
+                }
+                str += '  [';
+                for (r = 0; r < 10; r++) {
+                    if (r > 0) {
+                        str += ', ';
+                    }
+                    str += _columns[c][r + 10].popper.color;
+                }
+                str += ']';
+                if (c < 9) {
+                    str += ',';
+                }
+            }
+            console.log(str);
         }
     };
 
@@ -239,6 +282,7 @@ var Board = function (game) {
             group[i].pop();
         }
         self.dropPoppers(false);
+        _score(_indicated);
         _collectGroups();
         if (_noMoreMoves()) {
             self.startNextLevel();
@@ -269,9 +313,8 @@ var Board = function (game) {
         if (_indicated.length === 1 && !isBomb) {
             return;
         }
-        _pop(_indicated)
-        _score(_indicated);
-        this.clearIndication();
+        _pop(_indicated);
+        this.indicate(c, r);
     };
 
     this.update = function () {

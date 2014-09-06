@@ -1,7 +1,7 @@
 var Dot = require('./dot');
 var util = require('./util');
 
-var Slot = function (groups, board, c, r) {
+function Slot(groups, board, c, r) {
     var _board = board;
 
     this.row = r;
@@ -45,7 +45,7 @@ var Slot = function (groups, board, c, r) {
         }
         this.showDot(false);
     };
-};
+}
 Slot.load = function (game) {
     game.load.image('square', 'square.png');
 };

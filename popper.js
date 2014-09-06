@@ -2,8 +2,11 @@ var config = require('./config');
 var addPos = require('./addPos');
 var util = require('./util');
 
-var Popper = function (game, groups, c, r) {
-    this.color = util.getRandomColor();
+function Popper (game, groups, c, r, color) {
+    if (color === undefined) {
+        color = util.getRandomColor();
+    }
+    this.color = color;
 
     if (c === undefined) {
         c = 0;
@@ -20,9 +23,10 @@ var Popper = function (game, groups, c, r) {
     this.pos = addPos(game);
     this.pos({ row: r, col: c});
     this.pop = function () {
+        this.sprite.visible = false;
         groups.poppers.remove(this.sprite);
     };
-};
+}
 Popper.load = function (game) {
     game.load.spritesheet('poppers', 'poppers.png', config.PopperFrameWidth, config.PopperFrameHeight);
 };
