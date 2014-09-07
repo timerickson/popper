@@ -32,7 +32,7 @@ var Board = function (game) {
     var _spriteGroups = null;
 
     this.init = function () {
-        var r, c, p, s;
+        var r, c, s;
         if (_spriteGroups == null) {
             _spriteGroups = {
                 texts: game.add.group(),
@@ -90,14 +90,14 @@ var Board = function (game) {
                 slot.pop();
             }
         }
-    }
+    };
 
     this.fillPoppers = function (data) {
         var c, r, p, color;
         for (c = 0; c < 10; c++) {
             for (r = 0; r < 10; r++) {
                 if (data !== undefined) {
-                    color = data[c][r];
+                    color = data[c * 10 + r];
                 }
                 p = new Popper(game, _spriteGroups, c, r + 10, color);
                 _poppers.push(p);
@@ -106,19 +106,17 @@ var Board = function (game) {
             }
         }
         if (data === undefined) {
-            var str = '';
+            var str = '  ';
             for (c = 0; c < 10; c++) {
                 if (c > 0) {
                     str += '\r\n';
                 }
-                str += '  [';
                 for (r = 0; r < 10; r++) {
                     if (r > 0) {
                         str += ', ';
                     }
                     str += _columns[c][r + 10].popper.color;
                 }
-                str += ']';
                 if (c < 9) {
                     str += ',';
                 }
@@ -154,7 +152,7 @@ var Board = function (game) {
     var _groupMap = null;
 
     var _collectGroups = function () {
-        var c, r, group;
+        var c, r;
 
         //reset fields
         _groups = [];
@@ -225,7 +223,7 @@ var Board = function (game) {
     };
 
     var _slidePoppers = function () {
-        var c, colToRight, r;
+        var c, colToRight;
         var isColBlank = function (colNum) {
             var r,
                 isBlank = true;
