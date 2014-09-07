@@ -260,7 +260,7 @@ var Board = function (game) {
         }
     };
 
-    var _noMoreMoves = function () {
+    this.noMoreMoves = function () {
         var g, group;
         for (g in _groups) {
             group = _groups[g];
@@ -282,9 +282,13 @@ var Board = function (game) {
         self.dropPoppers(false);
         _score(_indicated);
         _collectGroups();
-        if (_noMoreMoves()) {
+        if (self.noMoreMoves()) {
             self.startNextLevel();
         }
+    };
+
+    this.getGroups = function () {
+        return _groups;
     };
 
     this.indicate = function (c, r) {
@@ -304,7 +308,7 @@ var Board = function (game) {
     };
 
     this.poke = function (c, r, isBomb) {
-        this.indicate(c, r);
+        self.indicate(c, r);
         if (_indicated.length === 0) {
             return;
         }
@@ -312,7 +316,7 @@ var Board = function (game) {
             return;
         }
         _pop(_indicated);
-        this.indicate(c, r);
+        self.indicate(c, r);
     };
 
     this.update = function () {
