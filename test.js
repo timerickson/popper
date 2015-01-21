@@ -1,65 +1,7 @@
 var Board = require('./board');
+var testShim = require('./test-shim');
 
-Phaser = {
-    Easing: {
-        Exponential: {
-        }
-    }
-};
-
-function MockGame() {
-    this.toString = function () { return "MockGame"; };
-    this.add = {
-        group: function () {
-            return {
-                toString: function () { return "group"; },
-                remove: function () {},
-                removeAll: function () {},
-                create: function () {
-                    return {
-                        toString: function () {return "Sprite"; },
-                        anchor: {
-                            setTo: function () {}
-                        },
-                        scale: {
-                        },
-                        events: {
-                            onInputOver: {
-                                add: function () {}
-                            },
-                            onInputOut: {
-                                add: function () {}
-                            },
-                            onInputUp: {
-                                add: function () {}
-                            }
-                        },
-                        bringToTop: function () {}
-                    };
-                }
-            };
-        },
-        text: function () {
-        },
-        tween: function () {
-            var obj = {
-                to: function () {
-                    return obj;
-                },
-                onComplete: {
-                    add: function () {}
-                }
-            };
-            return obj;
-        }
-    };
-}
-
-confirm = function () {
-
-};
-
-var mockGame = new MockGame();
+var mockGame = new testShim.MockGame();
 
 var data = [
     3, 4, 2, 4, 2, 4, 0, 2, 2, 3,
@@ -74,26 +16,123 @@ var data = [
     1, 0, 4, 4, 3, 3, 4, 3, 4, 0
 ];
 
-var board = new Board(mockGame);
-board.init();
-board.startNextLevel(data);
-console.log("groups", board.getGroups().length);
-var groups = [];
-var getNextGroupToPop = function () {
-    var g, group;
-    for (g = 0; g < groups.length; g++) {
-        group = groups[g];
-        if (group.length > 1) {
-            return group;
-        }
+function BruteForceTest(data) {
+    var _data = data;
+
+    function BoardState(board, path, parent) {
+        var data = board.getState(),
+            groups = board.getGroups(),
+            level = board.level;
+
+        var self = this;
+        console.log('BoardState groups', groups.length);
+
+        this.parent = parent;
+        this.level = level;
+        this.path = path === undefined ? [] : path;
+        this.depth = self.path.length;
+        this.data = data;
+        this.groups = groups;
+        this.paths = {};
+        this.pathCount = undefined;
+        this.optimalChoice = undefined;
+        this.optimalPath = undefined;
+        this.minScore = 0;
+        this.maxScore = 0;
+
+        this.getState = function (groupIndex) {
+            console.log('getState', self.path, groupIndex, 'of', self.groups.length);
+            var group = self.groups[groupIndex];
+            var firstSlot = group[0];
+            var key = getKey(firstSlot);
+            if (self.paths.hasOwnProperty(key)) {
+                console.log('returning', key);
+                return self.paths[key];
+            }
+            console.log('returning undefined');
+            return undefined;
+        };
+
+        this.setState = function (groupIndex, state) {
+            var group = self.groups[groupIndex];
+            var firstSlot = group[0];
+            var key = getKey(firstSlot);
+            console.log('getKey', key);
+            if (self.paths.hasOwnProperty(key)) {
+                throw { error: "PathExistsException", message: "State for path " + key + " already exists"}
+            }
+            self.paths[key] = state;
+        };
+
+        this.isResolved = function () {
+            return self.optimalChoice !== undefined;
+        };
+
+//        this.idString = function () {
+//            return 'level ' + self.level + ', '
+//        }
     }
-    throw {error:"NoPoppableGroupsException", message: "No poppable group found"};
-};
-while (!board.noMoreMoves()) {
-    groups = board.getGroups();
-    var nextGroupToPop = getNextGroupToPop();
-    var firstSlot = nextGroupToPop[0];
-    console.log('popping', firstSlot.col, firstSlot.row);
-    board.poke(firstSlot.col, firstSlot.row);
+
+    var board = new Board(mockGame);
+    board.init();
+    board.startNextLevel(data);
+    var state = new BoardState(board);
+
+    var getKey = function (slot) {
+//        console.log('getKey', slot);
+        return slot.col + ',' + slot.row;
+    };
+
+    var runNextPath = function (forState) {
+        var selectNext = function () {
+            var groups = forState.groups;
+            var g, group, nextGroupState;
+//            console.log('selectNext', groups[0].length, groups[1].length, groups[2].length);
+            for (g = 0; g < groups.length; g++) {
+                group = groups[g];
+                if (group.length === 0) {
+                    throw {error: "ZeroLengthGroupException", message: "Groups must have at least 1 slot"};
+                }
+                if (group.length === 1) {
+                    continue; //shouldn't be able to pop these until supporting bombs
+                }
+                nextGroupState = forState.getState(g);
+                if (nextGroupState !== undefined && nextGroupState.isResolved()) {
+                    continue;
+                }
+                return {
+                    groupIndex: g,
+                    group: group,
+                    state: nextGroupState
+                };
+            }
+            throw {error:"NoPoppableGroupsException", message: "No poppable group found"};
+        };
+
+        board.startNextLevel(forState.data, forState.level, forState.score);
+
+        var next = selectNext();
+        var firstSlot = next.group[0];
+        console.log("poking", firstSlot.col, firstSlot.row, forState.depth, board.score);
+        board.poke(firstSlot.col, firstSlot.row);
+        var newPath = forState.path.splice();
+        newPath.push(next.groupIndex);
+        forState.setState(next.groupIndex, new BoardState(board, newPath, forState))
+    };
+
+    var resolve = function (unresolvedState) {
+        while (iter++ < 100 && !unresolvedState.isResolved()) {
+            console.log('run', iter);
+            runNextPath(unresolvedState);
+        }
+    };
+
+    var iter = 0;
+
+    this.run = function () {
+        resolve(state);
+    };
 }
-console.log('done, score', board.score);
+
+var bruteForceTest = new BruteForceTest(data);
+bruteForceTest.run();

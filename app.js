@@ -37,7 +37,7 @@ var update = function () {
     board.update();
 };
 
-game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preLoad, create: create, update: update });
+//game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preLoad, create: create, update: update });
 
-var board = new Board(game);
+//var board = new Board(game);
 

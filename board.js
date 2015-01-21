@@ -46,10 +46,10 @@ var Board = function (game) {
         _spriteGroups.poppers.removeAll(true, true);
         _spriteGroups.dots.removeAll(true, true);
 
-        this.targetText = game.add.text(10, 10, '', {fill: 'white'}, _spriteGroups.texts);
-        this.scoreText = game.add.text(250, 10, '', {fill: 'white'}, _spriteGroups.texts);
-        this.levelText = game.add.text(10, 500, '', {fill: 'white'}, _spriteGroups.texts);
-        this.coinsText = game.add.text(250, 500, '', {fill: 'white'}, _spriteGroups.texts);
+        self.targetText = game.add.text(10, 10, '', {fill: 'white'}, _spriteGroups.texts);
+        self.scoreText = game.add.text(250, 10, '', {fill: 'white'}, _spriteGroups.texts);
+        self.levelText = game.add.text(10, 500, '', {fill: 'white'}, _spriteGroups.texts);
+        self.coinsText = game.add.text(250, 500, '', {fill: 'white'}, _spriteGroups.texts);
 
         for (c = 0; c < 10; c++) {
             for (r = 0; r < 20; r++) {
@@ -59,23 +59,30 @@ var Board = function (game) {
         }
     };
 
-    this.startNextLevel = function (data) {
-        if (this.score < this.target) {
-            alert('Game Over!');
+    this.startNextLevel = function (data, levelIndex, score) {
+        if (levelIndex !== undefined) {
+            self.level = levelIndex;
+        }
+        if (score !== undefined) {
+            self.score = score;
+        }
+        if (self.level > 1 && self.score < self.target) {
+//            console.log('Game Over!', self.score, self.target);
+            alert('Game Over!', self.level, self.score, self.target);
             return;
         }
-        if (this.level > 0 && !confirm('Next Level?')) {
+        if (self.level > 0 && !confirm('Next Level?')) {
             return;
         }
-        this.level++;
-        if (config.Targets.length > (this.level - 1)) {
-            this.target += config.Targets[this.level - 1];
+        self.level++;
+        if (config.Targets.length > (self.level - 1)) {
+            self.target += config.Targets[self.level - 1];
         } else {
-            this.target += config.DefaultTargetIncrement;
+            self.target += config.DefaultTargetIncrement;
         }
-        this.clearPoppers();
-        this.fillPoppers(data);
-        this.dropPoppers(true);
+        self.clearPoppers();
+        self.fillPoppers(data);
+        self.dropPoppers(true);
         _collectGroups();
     };
 
@@ -123,6 +130,22 @@ var Board = function (game) {
             }
             console.log(str);
         }
+    };
+
+    this.getState = function () {
+        var c, r, value, slot, state = [];
+        for (c = 0; c < 10; c++) {
+            for (r = 0; r < 10; r++) {
+                slot = _columns[c][r];
+                if (slot.popper === null) {
+                    value = null;
+                } else {
+                    value = slot.popper.color;
+                }
+                state[c * 10 + r] = value;
+            }
+        }
+        return state;
     };
 
     this.dropPoppers = function (isLevelStart) {
@@ -260,15 +283,15 @@ var Board = function (game) {
         }
     };
 
-    this.noMoreMoves = function () {
+    this.hasMoves = function () {
         var g, group;
         for (g in _groups) {
             group = _groups[g];
             if (group.length > 1) {
-                return false;
+                return true;
             }
         }
-        return true;
+        return false;
     };
 
     var _pop = function (group) {
@@ -282,7 +305,7 @@ var Board = function (game) {
         self.dropPoppers(false);
         _score(_indicated);
         _collectGroups();
-        if (self.noMoreMoves()) {
+        if (!self.hasMoves()) {
             self.startNextLevel();
         }
     };
@@ -320,10 +343,10 @@ var Board = function (game) {
     };
 
     this.update = function () {
-        this.levelText.text = 'Level: ' + this.level;
-        this.targetText.text = 'Target: ' + this.target;
-        this.scoreText.text = 'Score: ' + this.score;
-        this.coinsText.text = 'Coins: ' + this.coins;
+        self.levelText.text = 'Level: ' + self.level;
+        self.targetText.text = 'Target: ' + self.target;
+        self.scoreText.text = 'Score: ' + self.score;
+        self.coinsText.text = 'Coins: ' + self.coins;
     };
 };
 
