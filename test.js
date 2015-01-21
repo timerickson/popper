@@ -85,6 +85,7 @@ function BruteForceTest(data) {
 
     var runNextPath = function (forState) {
         var selectNext = function () {
+            console.log('selecting...');
             var groups = forState.groups;
             var g, group, nextGroupState;
 //            console.log('selectNext', groups[0].length, groups[1].length, groups[2].length);
@@ -112,6 +113,7 @@ function BruteForceTest(data) {
         board.startNextLevel(forState.data, forState.level, forState.score);
 
         var next = selectNext();
+        console.log('got next', next);
         var firstSlot = next.group[0];
         console.log("poking", firstSlot.col, firstSlot.row, forState.depth, board.score);
         board.poke(firstSlot.col, firstSlot.row);
@@ -120,10 +122,10 @@ function BruteForceTest(data) {
         forState.setState(next.groupIndex, new BoardState(board, newPath, forState))
     };
 
-    var resolve = function (unresolvedState) {
-        while (iter++ < 100 && !unresolvedState.isResolved()) {
+    var resolve = function (state) {
+        while (iter++ < 100 && !state.isResolved()) {
             console.log('run', iter);
-            runNextPath(unresolvedState);
+            runNextPath(state);
         }
     };
 
