@@ -178,6 +178,7 @@ var Board = function (game) {
         var c, r;
 
         //reset fields
+        //_groups.length = 0;
         _groups = [];
         _groupMap = [];
 
@@ -216,6 +217,9 @@ var Board = function (game) {
             };
         if (_groupMap[c][r] !== undefined) {
             return _groupMap[c][r];
+        }
+        if (checkSlot.popper == null) {
+            return;
         }
         _groups.push(group);
         if (checkSlot.popper === null) {

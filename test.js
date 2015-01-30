@@ -54,12 +54,14 @@ function BruteForceTest(data) {
         };
 
         this.setState = function (groupIndex, state) {
+            console.log('setState', groupIndex);
             var group = self.groups[groupIndex];
             var firstSlot = group[0];
             var key = getKey(firstSlot);
             console.log('getKey', key);
             if (self.paths.hasOwnProperty(key)) {
-                throw { error: "PathExistsException", message: "State for path " + key + " already exists"}
+                console.log('ERROR (PathExistsException)', key);
+                throw { error: "PathExistsException", message: "State for path " + key + " already exists"};
             }
             self.paths[key] = state;
         };
@@ -85,7 +87,7 @@ function BruteForceTest(data) {
 
     var runNextPath = function (forState) {
         var selectNext = function () {
-            console.log('selecting...');
+            console.log('select next');
             var groups = forState.groups;
             var g, group, nextGroupState;
 //            console.log('selectNext', groups[0].length, groups[1].length, groups[2].length);
@@ -113,17 +115,20 @@ function BruteForceTest(data) {
         board.startNextLevel(forState.data, forState.level, forState.score);
 
         var next = selectNext();
-        console.log('got next', next);
+        console.log('got next, groupIndex', next.groupIndex);
         var firstSlot = next.group[0];
         console.log("poking", firstSlot.col, firstSlot.row, forState.depth, board.score);
         board.poke(firstSlot.col, firstSlot.row);
         var newPath = forState.path.splice();
         newPath.push(next.groupIndex);
-        forState.setState(next.groupIndex, new BoardState(board, newPath, forState))
+        forState.setState(next.groupIndex, new BoardState(board, newPath, forState));
     };
 
     var resolve = function (state) {
         while (iter++ < 100 && !state.isResolved()) {
+            if (iter > 1) {
+                console.log();
+            }
             console.log('run', iter);
             runNextPath(state);
         }

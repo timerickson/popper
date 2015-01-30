@@ -1,6 +1,14 @@
 {
-    "decsription": "Popper game",
-    "dependencies" : {
-        "browserify": ""
-    }
+  "decsription": "Popper game",
+  "dependencies": {
+    "browserify": "",
+    "gulp-browserify": "",
+    "gulp-util": "",
+    "gulp-rename": "",
+    "react": "",
+    "reactify": ""
+  },
+  "devDependencies": {
+    "gulp": "^3.8.10"
+  }
 }
